@@ -1,0 +1,16 @@
+server:
+  port: 7910 #服务端口
+eureka: #配置要eureka的信息
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.32.250:8763/eureka/
+  instance:
+    prefer-ip-address: true
+spring: #配置服务的名字
+  application:
+    name: consumer-demo
+management: #开启全部的监听端点
+  endpoints:
+    web:
+      exposure:
+        include: "*"

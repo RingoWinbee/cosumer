@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Insert title here</title>
+<script src="http://localhost:10900/zuul/rout2/js/jquery-3.3.1.min.js" type="text/javascript"></script>
+</head>
+<body>
+<!-- 
+<script type="text/javascript">
+		$(function() {
+			$.ajax({
+				url : "http://localhost:10900/zuul/rout1/image/85bd6f0fb8908894360347c2cbc586c1",
+				type : "GET",
+				//后台返回的dataType类型和前台写的不一致会跳入error		
+				//dataType: "text",
+				contentType: "image/png",
+				data : {
+					"hashCode" : "85bd6f0fb8908894360347c2cbc586c1"
+				},
+				async : false,
+				success : function(data) {
+					$("#result").attr("src",data);
+				},
+				//如果有错误抛出则向页面显示错误信息
+				error : function(XMLHttpRequest, textStatus, errorThrown) {
+					alert(XMLHttpRequest.status);
+					alert(XMLHttpRequest.readyState);
+					alert(textStatus);
+				},
+			});
+		});
+	</script>
+	
+		<img alt="图片" src="data:image/png;base64," style="width:400px;height: 200px" id="result">
+ 
+	<img th:src="@{http://localhost:10900/zuul/rout1/image/85bd6f0fb8908894360347c2cbc586c1" />
+	<a th:href="@{http://www.baidu.com}">a</a>
+	<img alt="图片" src="" style="width:400px;height: 200px" id="result">
+	 -->
+	<form method="POST" enctype="multipart/form-data" action="http://localhost:10900/zuul/rout2/consumer/hhh">
+		File to upload: 
+		<input type="file" name="picture">
+		<input type="submit" value="Upload">
+	</form>
+	
+	<a href="http://localhost:10900/zuul/rout2/consumer/getImage/953599ed98a4c91873f1114dc41b3522" download="w3logo.jpg">
+			<img alt="图片" src="http://localhost:10900/zuul/rout2/consumer/getImage/953599ed98a4c91873f1114dc41b3522" style="width:400px;height: 200px" id="result">
+	</a>
+</body>
+</html>
