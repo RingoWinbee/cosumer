@@ -4,6 +4,7 @@ package com.example.demo;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -110,5 +111,25 @@ public class ConsumerController {
 	@RequestMapping("/consumer/creatLocalGit")
 	public void creatLocalGit(@RequestParam(name = "filePath", required = true) String filePath) {
 		new IGit(restTemplate).creatLocalGit(filePath);
+	}
+	
+	@RequestMapping("/consumer/getLog")
+	public void getLog(@RequestParam(name = "filePath", required = true) String filePath) {
+		List<LogEnity> logs=new IGit(restTemplate).getLog(filePath);
+		for(LogEnity log:logs) {
+			System.out.println("id:"+log.getCommitId());
+			System.out.println("author:"+log.getCommitAuthor());
+		}
+	}
+	
+	@RequestMapping("/consumer/getStatus")
+	public void getStatus(@RequestParam(name = "filePath", required = true) String filePath) {
+		StatusList s=new IGit(restTemplate).getStatus(filePath);
+		s.getAddFile().forEach(it -> System.out.println("AddFile:" + it));
+		s.getRemoveFile().forEach(it -> System.out.println("RemoveFile:" + it));
+		s.getModifiedFile().forEach(it -> System.out.println("ModifiedFile:" + it));
+		s.getUntrackedFile().forEach(it -> System.out.println("UntrackedFile:" + it));
+		s.getConfictingFile().forEach(it -> System.out.println("ConfictingFile:" + it));
+		s.getMissingFile().forEach(it -> System.out.println("MissingFile:" + it));
 	}
 }

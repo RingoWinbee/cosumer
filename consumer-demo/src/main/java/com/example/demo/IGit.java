@@ -2,7 +2,6 @@ package com.example.demo;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -25,12 +24,12 @@ public class IGit {
 	public void createRemote(String remoteName) {
 		// HttpHeaders headers = new HttpHeaders();
 		// headers.setContentType(MediaType.ALL);
-		 MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
 		param.add("remoteName", remoteName);
 		// HttpEntity<MultiValueMap<String, String>> formEntity = new
 		// HttpEntity<>(param);
-		String wayUrl = serviceUrl+"createRemote";
-		//restTemplate.getForObject(wayUrl,String.class);
+		String wayUrl = serviceUrl + "createRemote";
+		// restTemplate.getForObject(wayUrl,String.class);
 		restTemplate.postForObject(wayUrl, param, String.class);
 		// System.out.println(a);
 		// URI location =
@@ -50,7 +49,7 @@ public class IGit {
 		String wayUrl = serviceUrl + "creatLocalGit";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
 	 * 用于Git-add文件到缓冲区
 	 */
@@ -61,7 +60,7 @@ public class IGit {
 		String wayUrl = serviceUrl + "add";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
 	 * 用于Git-rm -f将文件移出缓冲区和工作区,没有add直接rm会无效,有add但没有commit直接rm会git status看不到记录,
 	 */
@@ -72,7 +71,7 @@ public class IGit {
 		String wayUrl = serviceUrl + "rm";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
 	 * 用于Git-commit文件到区
 	 */
@@ -83,31 +82,138 @@ public class IGit {
 		String wayUrl = serviceUrl + "commit";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
 	 * 查看git文件夹状态(相当于git status)
 	 */
 	public StatusList getStatus(String filePath) {
-		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
-		param.add("filePath", filePath);
-		String wayUrl = serviceUrl + "getStatus";
-		return restTemplate.getForObject(wayUrl, StatusList.class,param);
+		// restTemplate.getForObject不知道为什么只能在url后面接参数来传参,postForObject就可以方法加参数,而且不管被调用的方法是post还是get都可以用postForObject
+		String wayUrl = serviceUrl + "getStatus?filePath=" + filePath;
+		return restTemplate.getForObject(wayUrl, StatusList.class);
 	}
-	
+
 	/**
 	 * 查看git提交日志(相当于git log)
-	 * @param LogEnity 
-	 * @param List 
+	 * 
+	 * @param LogEnity
+	 * @param List
 	 */
-	public List<LogEnity> getLog(String filePath){
-		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
-		param.add("filePath", filePath);
-		String wayUrl = serviceUrl + "getLog";
-		LogEnity[] ls=restTemplate.getForObject(wayUrl, LogEnity[].class,param);
-		List<LogEnity> logs=new ArrayList<LogEnity>();
-		for(LogEnity l:ls) {
+	public List<LogEnity> getLog(String filePath) {
+		// restTemplate.getForObject不知道为什么只能在url后面接参数来传参,postForObject就可以方法加参数,而且不管被调用的方法是post还是get都可以用postForObject
+		String wayUrl = serviceUrl + "getLog?filePath=" + filePath;
+		LogEnity[] ls = restTemplate.getForObject(wayUrl, LogEnity[].class);
+		List<LogEnity> logs = new ArrayList<LogEnity>();
+		for (LogEnity l : ls) {
 			logs.add(l);
 		}
 		return logs;
+	}
+
+	/**
+	 * 回退到上一个版本(相当于git reset --hard HEAD^)
+	 * 
+	 */
+	public void resetLastOne(String filePath) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("filePath", filePath);
+		String wayUrl = serviceUrl + "resetLastOne";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+
+	/**
+	 * 回退到指定版本(相当于git reset --hard 版本号)
+	 * 
+	 */
+	public void reset(String filePath, String version) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("filePath", filePath);
+		param.add("version", version);
+		String wayUrl = serviceUrl + "reset";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+
+	/**
+	 * 创建分支(相当于git branch <name> )
+	 * 
+	 */
+	public void createBranch(String filePath, String bname) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("filePath", filePath);
+		param.add("bname", bname);
+		String wayUrl = serviceUrl + "createBranch";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+
+	/**
+	 * 把某个分支合并到当前分支(相当于git merge <name>)
+	 */
+	public void mergeBranch(String filePath, String bname) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("filePath", filePath);
+		param.add("bname", bname);
+		String wayUrl = serviceUrl + "mergeBranch";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+
+	/**
+	 * 删除分支(相当于git branch -d<name> )
+	 * 
+	 */
+	public void deleteBranch(String filePath, String bname) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("filePath", filePath);
+		param.add("bname", bname);
+		String wayUrl = serviceUrl + "deleteBranch";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+	
+	/**
+	 * 切换分支(相当于git checkout <name> 如果有文件没有commit就不会执行)
+	 * 
+	 */
+	public void checkOutBranch(String filePath, String bname) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("filePath", filePath);
+		param.add("bname", bname);
+		String wayUrl = serviceUrl + "checkOutBranch";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+	
+	/**
+	 * 把远程仓库clone到指定目录(相当于git clone )默认显示mastet分支,其他分支要自己切换
+	 * 
+	 */
+	public void clone(String remoteName, String filePath) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("remoteName", remoteName);
+		param.add("filePath", filePath);
+		String wayUrl = serviceUrl + "clone";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+	
+	/**
+	* 向远程仓库某个分支push((相当于git push)) 或者用于新建分支向远程仓库的推送
+	 * 
+	 */
+	public void push(String remoteName, String bName,String filePath) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("remoteName", remoteName);
+		param.add("bName", bName);
+		param.add("filePath", filePath);
+		String wayUrl = serviceUrl + "push";
+		restTemplate.postForObject(wayUrl, param, String.class);
+	}
+	
+	/**
+	* 从远程仓库拉取特定分支((相当于git pull)) 或者用于新建分支向远程仓库的推送
+	 * 
+	 */
+	public void pull(String remoteName, String bName,String filePath) {
+		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
+		param.add("remoteName", remoteName);
+		param.add("bName", bName);
+		param.add("filePath", filePath);
+		String wayUrl = serviceUrl + "pull";
+		restTemplate.postForObject(wayUrl, param, String.class);
 	}
 }
