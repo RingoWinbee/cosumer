@@ -166,7 +166,7 @@ public class IGit {
 		String wayUrl = serviceUrl + "deleteBranch";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
 	 * 切换分支(相当于git checkout <name> 如果有文件没有commit就不会执行)
 	 * 
@@ -178,7 +178,24 @@ public class IGit {
 		String wayUrl = serviceUrl + "checkOutBranch";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
+	/**
+	 * 把获取当前仓库的所有分支名(相当于git branch )
+	 * 
+	 * @param LogEnity
+	 * @param List
+	 */
+	public List<String> showAllBranch(String filePath) {
+		// restTemplate.getForObject不知道为什么只能在url后面接参数来传参,postForObject就可以方法加参数,而且不管被调用的方法是post还是get都可以用postForObject
+		String wayUrl = serviceUrl + "showAllBranch?filePath=" + filePath;
+		String[] bs = restTemplate.getForObject(wayUrl, String[].class);
+		List<String> lbs = new ArrayList<String>();
+		for (String b : bs) {
+			lbs.add(b);
+		}
+		return lbs;
+	}
+
 	/**
 	 * 把远程仓库clone到指定目录(相当于git clone )默认显示mastet分支,其他分支要自己切换
 	 * 
@@ -190,12 +207,12 @@ public class IGit {
 		String wayUrl = serviceUrl + "clone";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
-	* 向远程仓库某个分支push((相当于git push)) 或者用于新建分支向远程仓库的推送
+	 * 向远程仓库某个分支push((相当于git push)) 或者用于新建分支向远程仓库的推送
 	 * 
 	 */
-	public void push(String remoteName, String bName,String filePath) {
+	public void push(String remoteName, String bName, String filePath) {
 		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
 		param.add("remoteName", remoteName);
 		param.add("bName", bName);
@@ -203,12 +220,12 @@ public class IGit {
 		String wayUrl = serviceUrl + "push";
 		restTemplate.postForObject(wayUrl, param, String.class);
 	}
-	
+
 	/**
-	* 从远程仓库拉取特定分支((相当于git pull)) 或者用于新建分支向远程仓库的推送
+	 * 从远程仓库拉取特定分支((相当于git pull)) 或者用于新建分支向远程仓库的推送
 	 * 
 	 */
-	public void pull(String remoteName, String bName,String filePath) {
+	public void pull(String remoteName, String bName, String filePath) {
 		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
 		param.add("remoteName", remoteName);
 		param.add("bName", bName);

@@ -132,4 +132,12 @@ public class ConsumerController {
 		s.getConfictingFile().forEach(it -> System.out.println("ConfictingFile:" + it));
 		s.getMissingFile().forEach(it -> System.out.println("MissingFile:" + it));
 	}
+	
+	@RequestMapping("/consumer/getAllBanch")
+	public void getAllBanch(@RequestParam(name = "filePath", required = true) String filePath) {
+		List<String> bs=new IGit(restTemplate).showAllBranch(filePath);
+		for(String b:bs) {
+			System.out.println(b);
+		}
+	}
 }
