@@ -3,7 +3,7 @@ server:
 eureka: #配置要eureka的信息
   client:
     serviceUrl:
-      defaultZone: http://localhost:8763/eureka/
+      defaultZone: http://192.168.32.250:8763/eureka/
   instance:
     prefer-ip-address: true
 spring: #配置服务的名字

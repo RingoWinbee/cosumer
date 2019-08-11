@@ -27,18 +27,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import xiaolei.gao.git.IGit;
+import xiaolei.gao.git.LogEnity;
+import xiaolei.gao.git.StatusList;
 
 @RestController
 public class ConsumerController {
 
 	@Autowired
 	private RestTemplate restTemplate;
-	
-	@Bean 
+
+	@Bean
 	@LoadBalanced
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
+
 	@Autowired
 	private LoadBalancerClient loadBalancerClient;
 
@@ -50,7 +54,8 @@ public class ConsumerController {
 	}
 
 	@RequestMapping(value = "/consumer/hhh", method = RequestMethod.POST)
-	public void test(@RequestParam(name = "picture", required = true)MultipartFile picture) throws IllegalStateException, IOException {
+	public void test(@RequestParam(name = "picture", required = true) MultipartFile picture)
+			throws IllegalStateException, IOException {
 		String fileName = picture.getOriginalFilename();
 		String tempFilePath = System.getProperty("java.io.tmpdir") + picture.getOriginalFilename();
 		File tempFile = new File(tempFilePath);
@@ -107,24 +112,24 @@ public class ConsumerController {
 	public void createRemote(@RequestParam(name = "remoteName", required = true) String remoteName) {
 		new IGit(restTemplate).createRemote(remoteName);
 	}
-	
+
 	@RequestMapping("/consumer/creatLocalGit")
 	public void creatLocalGit(@RequestParam(name = "filePath", required = true) String filePath) {
 		new IGit(restTemplate).creatLocalGit(filePath);
 	}
-	
+
 	@RequestMapping("/consumer/getLog")
 	public void getLog(@RequestParam(name = "filePath", required = true) String filePath) {
-		List<LogEnity> logs=new IGit(restTemplate).getLog(filePath);
-		for(LogEnity log:logs) {
-			System.out.println("id:"+log.getCommitId());
-			System.out.println("author:"+log.getCommitAuthor());
+		List<LogEnity> logs = new IGit(restTemplate).getLog(filePath);
+		for (LogEnity log : logs) {
+			System.out.println("id:" + log.getCommitId());
+			System.out.println("author:" + log.getCommitAuthor());
 		}
 	}
-	
+
 	@RequestMapping("/consumer/getStatus")
 	public void getStatus(@RequestParam(name = "filePath", required = true) String filePath) {
-		StatusList s=new IGit(restTemplate).getStatus(filePath);
+		StatusList s = new IGit(restTemplate).getStatus(filePath);
 		s.getAddFile().forEach(it -> System.out.println("AddFile:" + it));
 		s.getRemoveFile().forEach(it -> System.out.println("RemoveFile:" + it));
 		s.getModifiedFile().forEach(it -> System.out.println("ModifiedFile:" + it));
@@ -132,12 +137,23 @@ public class ConsumerController {
 		s.getConfictingFile().forEach(it -> System.out.println("ConfictingFile:" + it));
 		s.getMissingFile().forEach(it -> System.out.println("MissingFile:" + it));
 	}
-	
+
 	@RequestMapping("/consumer/getAllBanch")
 	public void getAllBanch(@RequestParam(name = "filePath", required = true) String filePath) {
-		List<String> bs=new IGit(restTemplate).showAllBranch(filePath);
-		for(String b:bs) {
+		List<String> bs = new IGit(restTemplate).showAllBranch(filePath);
+		for (String b : bs) {
 			System.out.println(b);
 		}
+	}
+	
+	@RequestMapping("/consumer/clone")
+	public void clone(@RequestParam(name = "filePath", required = true) String filePath,@RequestParam(name = "remoteName", required = true) String remoteName) {
+		new IGit(restTemplate).clone(remoteName, filePath);
+	}
+	
+	@RequestMapping("/consumer/createLocal")
+	public void createLocal(@RequestParam(name = "filePath", required = true) String filePath
+			) {
+		new IGit(restTemplate).creatLocalGit(filePath);
 	}
 }
