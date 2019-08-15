@@ -1,7 +1,6 @@
 
 package com.example.demo;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -13,23 +12,22 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.alibaba.fastjson.JSONObject;
+
+import xiaolei.gao.Image.ImageInterface;
 import xiaolei.gao.git.IGit;
 import xiaolei.gao.git.LogEnity;
 import xiaolei.gao.git.StatusList;
+import xiaolei.gao.hashFile.HashFileInterface;
 
 @RestController
 public class ConsumerController {
@@ -56,23 +54,24 @@ public class ConsumerController {
 	@RequestMapping(value = "/consumer/hhh", method = RequestMethod.POST)
 	public void test(@RequestParam(name = "picture", required = true) MultipartFile picture)
 			throws IllegalStateException, IOException {
-		String fileName = picture.getOriginalFilename();
-		String tempFilePath = System.getProperty("java.io.tmpdir") + picture.getOriginalFilename();
-		File tempFile = new File(tempFilePath);
-		picture.transferTo(tempFile);
-		String url = "http://training-image_manage-service/imageUpload";
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Accept", MediaType.APPLICATION_JSON.toString());
-		headers.setContentType(MediaType.parseMediaType("multipart/form-data;charset=UTF-8"));
-		MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
-		FileSystemResource resource = new FileSystemResource(tempFilePath);
-		param.add("picture", resource);
-		System.out.println("fileName:   " + fileName);
-		HttpEntity<MultiValueMap<String, Object>> formEntity = new HttpEntity<>(param, headers);
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, formEntity, String.class);
-		String str = responseEntity.getBody();
-		System.out.println(str);
-		tempFile.delete();
+//		//String fileName = picture.getOriginalFilename();
+//		String tempFilePath = System.getProperty("java.io.tmpdir") + picture.getOriginalFilename();
+//		File tempFile = new File(tempFilePath);
+//		picture.transferTo(tempFile);
+//		String url = "http://training-image-manage-service/imageUpload";
+//		HttpHeaders headers = new HttpHeaders();
+//		//headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+//		headers.setContentType(MediaType.parseMediaType("multipart/form-data;charset=UTF-8"));
+//		MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
+//		FileSystemResource resource = new FileSystemResource(tempFilePath);
+//		param.add("picture", resource);
+//		//System.out.println("fileName:   " + fileName);
+//		HttpEntity<MultiValueMap<String, Object>> formEntity = new HttpEntity<>(param, headers);
+//		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, formEntity, String.class);
+//		String str = responseEntity.getBody();
+//		System.out.println(str);
+//		tempFile.delete();
+		new ImageInterface(restTemplate).imageUpload(picture);
 	}
 
 	@RequestMapping(value = "/consumer/getImage/{hashCade}", method = RequestMethod.GET)
@@ -145,15 +144,39 @@ public class ConsumerController {
 			System.out.println(b);
 		}
 	}
-	
+
 	@RequestMapping("/consumer/clone")
-	public void clone(@RequestParam(name = "filePath", required = true) String filePath,@RequestParam(name = "remoteName", required = true) String remoteName) {
+	public void clone(@RequestParam(name = "filePath", required = true) String filePath,
+			@RequestParam(name = "remoteName", required = true) String remoteName) {
 		new IGit(restTemplate).clone(remoteName, filePath);
 	}
-	
+
 	@RequestMapping("/consumer/createLocal")
-	public void createLocal(@RequestParam(name = "filePath", required = true) String filePath
-			) {
+	public void createLocal(@RequestParam(name = "filePath", required = true) String filePath) {
 		new IGit(restTemplate).creatLocalGit(filePath);
+	}
+
+	@RequestMapping("/consumer/testException")
+	public void testException() {
+		try {
+			restTemplate.getForObject("http://demo/user/1",String.class);
+        } catch (RestClientResponseException e){
+        	JSONObject pa=JSONObject.parseObject(e.getResponseBodyAsString());
+        	System.out.println(pa.getString("message"));
+            //System.out.println("出现RestClient异常 :"+e.getResponseBodyAsString() );
+        	e.printStackTrace();
+        } catch (Exception e){
+        	System.out.println("出现Exception异常 :"+e.getMessage());
+        }
+	}
+	
+	@RequestMapping(value = "/consumer/testHash", method = RequestMethod.POST)
+	public void testHash(@RequestParam(name = "hashFile", required = true) MultipartFile hashFile) {
+		try {
+			new HashFileInterface(restTemplate).hashFileUpload(hashFile);
+		} catch (IllegalStateException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
