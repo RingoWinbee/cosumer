@@ -3,6 +3,7 @@ package com.example.demo;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -12,6 +13,9 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson.JSONObject;
 
 import xiaolei.gao.Image.ImageInterface;
+import xiaolei.gao.file.FileInterface;
 import xiaolei.gao.git.IGit;
 import xiaolei.gao.git.LogEnity;
 import xiaolei.gao.git.StatusList;
@@ -38,6 +43,15 @@ public class ConsumerController {
 	@Bean
 	@LoadBalanced
 	public RestTemplate restTemplate() {
+//		RestTemplate restTemplate = new RestTemplate();
+//		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+//
+//
+//        converter.setSupportedMediaTypes(
+//                Arrays.asList(new MediaType[]{MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM}));
+//
+//        restTemplate.setMessageConverters(Arrays.asList(converter, new FormHttpMessageConverter()));
+//        return restTemplate;
 		return new RestTemplate();
 	}
 
@@ -173,10 +187,49 @@ public class ConsumerController {
 	@RequestMapping(value = "/consumer/testHash", method = RequestMethod.POST)
 	public void testHash(@RequestParam(name = "hashFile", required = true) MultipartFile hashFile) {
 		try {
-			new HashFileInterface(restTemplate).hashFileUpload(hashFile);
+			System.out.println(new HashFileInterface(restTemplate).hashFileUpload(hashFile));
 		} catch (IllegalStateException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	@RequestMapping(value = "/consumer/testImg", method = RequestMethod.POST)
+	public String testImg(@RequestParam(name = "picture", required = true) MultipartFile picture) {
+			try {
+				return new ImageInterface(restTemplate).imageUpload(picture);
+			} catch (IllegalStateException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return "上传失败";
+	}
+	
+	@RequestMapping(value = "/consumer/testFileString", method = RequestMethod.POST)
+	public String testFileString(@RequestParam(name = "fileString", required = true) String  fileString) {
+			try {
+				return new FileInterface(restTemplate).fileUpload(fileString);
+			} catch (IllegalStateException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return "上传失败";
+	}
+	
+	@RequestMapping(value = "/consumer/testFile", method = RequestMethod.POST)
+	public String testFile(@RequestParam(name = "file", required = true) MultipartFile file) {
+			try {
+				return new FileInterface(restTemplate).fileUpload(file);
+			} catch (IllegalStateException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return "上传失败";
+	}
+	
+	@RequestMapping(value = "/consumer/testHashGet", method = RequestMethod.GET)
+	public byte[] testHashGet(@RequestParam(name = "fileHash", required = true) String fileHash) {
+			return new HashFileInterface(restTemplate).getHashFile(fileHash);
+		}
+	
 }

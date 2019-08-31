@@ -1,17 +1,12 @@
 package xiaolei.gao.Image;
 
-import java.io.File;
 import java.io.IOException;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import com.google.gson.Gson;
 
 @Component
 public class ImageInterface {
@@ -32,19 +27,15 @@ public class ImageInterface {
 	 * @throws IllegalStateException
 	 */
 	public String imageUpload(MultipartFile picture) throws IllegalStateException, IOException {
-		String tempFilePath = System.getProperty("java.io.tmpdir") + picture.getOriginalFilename();
-		File tempFile = new File(tempFilePath);
-		picture.transferTo(tempFile);
 		String wayUrl = serviceUrl + "imageUpload";
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.parseMediaType("multipart/form-data;charset=UTF-8"));
+		// 将文件的二进制数据序列化成json字符串,不然直接传byte[]到后台的话就会大小不一致
+		String byteJsonString = new Gson().toJson(picture.getBytes());
 		MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
-		FileSystemResource resource = new FileSystemResource(tempFilePath);
-		param.add("picture", resource);
-		HttpEntity<MultiValueMap<String, Object>> formEntity = new HttpEntity<>(param, headers);
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(wayUrl, formEntity, String.class);
-		tempFile.delete();
-		return responseEntity.getBody();
+		param.add("byteJsonString", byteJsonString);
+		param.add("fileLastName",//文件的后缀名
+				picture.getOriginalFilename().substring(picture.getOriginalFilename().lastIndexOf('.')));
+		param.add("fileSize", picture.getSize());//文件的大小
+		return restTemplate.postForObject(wayUrl, param, String.class);
 	}
 
 	/**
@@ -55,21 +46,20 @@ public class ImageInterface {
 	 */
 	public String imageDelete(String imageHash) {
 		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
-		param.add("imageHash", imageHash);
+		param.add("hashCode", imageHash);
 		String wayUrl = serviceUrl + "deleteImage";
 		return restTemplate.postForObject(wayUrl, param, String.class);
 	}
 
 	/**
-	 *  获取图片
+	 * 获取图片
 	 * 
 	 * @param String imageHash
 	 * @return byte[] 图片二进制数据
 	 */
 	public byte[] getImage(String imageHash) {
-		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
-		param.add("imageHash", imageHash);
-		String wayUrl = serviceUrl + "getImage";
-		return restTemplate.postForObject(wayUrl, param, byte[].class);
+		// restTemplate.getForObject不知道为什么只能在url后面接参数来传参,postForObject就可以方法加参数,而且不管被调用的方法是post还是get都可以用postForObject
+		String wayUrl = serviceUrl + "getImage?imageHash=" + imageHash;
+		return restTemplate.getForObject(wayUrl, byte[].class);
 	}
 }
