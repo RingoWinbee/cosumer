@@ -64,7 +64,7 @@ public class IGit {
 	 * 用于Git-add文件到缓冲区
 	 * 
 	 * @param gitName(本地仓库名字)
-	 * @param fileName(文件名,所有的话用*)
+	 * @param fileName(文件名,所有的话用 ".")
 	 */
 	public void add(String gitName, String fileName) {
 		MultiValueMap<String, String> param = new LinkedMultiValueMap<>();
