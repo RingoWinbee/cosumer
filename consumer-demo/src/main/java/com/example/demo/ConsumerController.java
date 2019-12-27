@@ -10,7 +10,10 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import xiaolei.gao.Image.ImageInterface;
+import xiaolei.gao.file.FileInterface;
 import xiaolei.gao.task.TaskInterface;
 
 @RestController
@@ -27,7 +32,7 @@ public class ConsumerController {
 	private RestTemplate restTemplate;
 
 	@Bean
-	@LoadBalanced
+	//@LoadBalanced
 	public RestTemplate restTemplate() {
 		// RestTemplate restTemplate = new RestTemplate();
 		// MappingJackson2HttpMessageConverter converter = new
@@ -62,6 +67,46 @@ public class ConsumerController {
 		System.out.println(result);
 	}
 
+//	@DeleteMapping("/deleteImage")
+//	public void deleteImage(@RequestParam(name="hashCode") String hashCode,
+//			@RequestParam(name="definePath",required=false) String definePath){
+//		if(definePath==null){
+//			new FileInterface(restTemplate).fileDelete(hashCode);
+//		}else
+//			new FileInterface(restTemplate).fileDelete(hashCode, definePath);
+//	}
+//	
+//	@PostMapping("/uploadImage")
+//	public void uploadImage(@RequestParam(name="file") MultipartFile file,
+//			@RequestParam(name="fileUuid") String fileUuid,
+//			@RequestParam(name="definePath",required=false) String definePath) throws IOException{
+//		if(definePath==null){
+//			new FileInterface(restTemplate).fileUpload(file,fileUuid);
+//		}else
+//			new FileInterface(restTemplate).fileUpload(file, fileUuid, definePath);
+//	}
+//	@GetMapping("/getImage")
+//	public byte[] testImage(@RequestParam(name="hashCode") String hashCode,
+//			@RequestParam(name="definePath",required=false) String definePath){
+//		if(definePath==null){
+//			return new FileInterface(restTemplate).getFile(hashCode);
+//		}else
+//			return new FileInterface(restTemplate).getFile(hashCode,definePath);
+//	}
+	@DeleteMapping("/deleteImage")
+	public String deleteImage(@RequestParam(name="hashCode") String hashCode){
+			return new ImageInterface(restTemplate).imageDelete(hashCode);
+	}
+	
+	@PostMapping("/uploadImage")
+	public String uploadImage(@RequestParam(name="file") MultipartFile file) throws IOException{
+		return new ImageInterface(restTemplate).imageUpload(file);
+	}
+	@GetMapping("/getImage")
+	public byte[] testImage(@RequestParam(name="hashCode") String hashCode){
+		return new ImageInterface(restTemplate).getImage(hashCode);
+	}
+	
 	@RequestMapping(value = "/consumer/getImage/{hashCade}", method = RequestMethod.GET)
 	public byte[] getImage(@PathVariable("hashCode") String hashCode)
 			throws IllegalStateException, IOException {
