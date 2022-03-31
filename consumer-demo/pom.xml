@@ -18,7 +18,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<!-- 因为spring-cloud有些组件不会跟随parent组件的版本来下载，就算你parent是2.0.3,他也是会去下载2.1.0以上的包,所以需要手动去显示控制版本 -->
-		<spring-cloud.version>2.0.3.RELEASE</spring-cloud.version>
+		<spring-cloud.version>2.5.12</spring-cloud.version>
 	</properties>
 
 	<dependencies>
